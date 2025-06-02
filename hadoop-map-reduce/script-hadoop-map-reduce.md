@@ -3,7 +3,7 @@
 ## Intégration du fichier `city_temperature.csv` en local (Vagrant)
 Téléchargez le dataset : [Kaggle - Daily Temperature of Major Cities](https://www.kaggle.com/datasets/sudalairajkumar/daily-temperature-of-major-cities)
 
-1. Extrayez le fichier `city_temperature.csv`.
+1. Extraire le fichier `city_temperature.csv`.
 2. Copiez-le dans un dossier `data-temperature` dans le dossier Vagrant.
 
 ## Intégration du fichier `city_temperature.csv` dans HDFS
