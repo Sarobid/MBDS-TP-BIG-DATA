@@ -35,6 +35,9 @@ ps aux | grep hive
 - Quitter et refaire vagrant ssh
 - Installer ScyllaDB via Docker :
   ```sh
+  docker pull scylladb/scylla:6.0.3
+  ```
+  ```sh
   docker run --name nodeX -p 9042:9042 -d scylladb/scylla:6.0.3 --smp 1
   ```
 - Accéder au terminal ScyllaDB :
