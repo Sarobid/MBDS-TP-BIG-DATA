@@ -1,0 +1,28 @@
+[
+    {
+        "label": "SparkSession",
+        "importPath": "pyspark.sql",
+        "description": "pyspark.sql",
+        "isExtraImport": true,
+        "detail": "pyspark.sql",
+        "documentation": {}
+    },
+    {
+        "label": "spark",
+        "kind": 5,
+        "importPath": "scylladb.script scylla to hive.scylla_to_hive",
+        "description": "scylladb.script scylla to hive.scylla_to_hive",
+        "peekOfCode": "spark = SparkSession.builder \\\n    .appName(\"ScyllaToHive\") \\\n    .config(\"spark.cassandra.connection.host\", \"127.0.0.1\") \\\n    .enableHiveSupport() \\\n    .getOrCreate()\ndf = spark.read \\\n    .format(\"org.apache.spark.sql.cassandra\") \\\n    .options(table=\"policies\", keyspace=\"climate_policies\") \\\n    .load()\ndf.show()",
+        "detail": "scylladb.script scylla to hive.scylla_to_hive",
+        "documentation": {}
+    },
+    {
+        "label": "df",
+        "kind": 5,
+        "importPath": "scylladb.script scylla to hive.scylla_to_hive",
+        "description": "scylladb.script scylla to hive.scylla_to_hive",
+        "peekOfCode": "df = spark.read \\\n    .format(\"org.apache.spark.sql.cassandra\") \\\n    .options(table=\"policies\", keyspace=\"climate_policies\") \\\n    .load()\ndf.show()\ndf.write.mode(\"overwrite\").parquet(\"climate_policies\")\nspark.stop()",
+        "detail": "scylladb.script scylla to hive.scylla_to_hive",
+        "documentation": {}
+    }
+]
