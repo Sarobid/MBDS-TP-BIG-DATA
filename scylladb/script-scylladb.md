@@ -57,6 +57,7 @@ CREATE TABLE climate_policies.policies (
     Policy_Type text,
     sector text,
     bm25_score_first float,
+    pays text,
     PRIMARY KEY (IPCC_Region, Year, "Index")
 );
 ```
@@ -112,6 +113,11 @@ CREATE TABLE climate_policies.policies (
 ## 8. Création de la table externe Hive
 
 ```sql
+
+CREATE DATABASE IF NOT EXISTS global_warming_db;
+
+USE global_warming_db;
+
 CREATE EXTERNAL TABLE climate_policies_hive (
   ipcc_region STRING,
   year INT,
@@ -119,7 +125,8 @@ CREATE EXTERNAL TABLE climate_policies_hive (
   bm25_score_first DOUBLE,
   policy_raw STRING,
   policy_type STRING,
-  sector STRING
+  sector STRING,
+  pays STRING
 )
 STORED AS PARQUET
 LOCATION 'hdfs:/user/vagrant/climate_policies';

@@ -30,8 +30,8 @@ public class App {
                      .withFirstRecordAsHeader())) {
 
             String insertQuery = "INSERT INTO climate_policies.policies " +
-                    "(\"Index\", Policy_raw, Year, IPCC_Region, Policy_Type, sector, bm25_score_first) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    "(\"Index\", Policy_raw, Year, IPCC_Region, Policy_Type, sector, bm25_score_first, pays) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement prepared = session.prepare(insertQuery);
 
             BatchStatementBuilder batchBuilder = BatchStatement.builder(BatchType.UNLOGGED);
@@ -45,6 +45,7 @@ public class App {
                 String policyType = record.get("Policy_Type");
                 String sector = record.get("sector");
                 Float bm25ScoreFirst = parseFloat(record.get("bm25_score_first"));
+                String pays = record.get("Short_name");
 
                 if (index == null || year == null || ipccRegion == null || ipccRegion.isEmpty()) {
                     System.out.println("Skipping row with missing primary key field: " + record.toString());
@@ -58,7 +59,8 @@ public class App {
                         ipccRegion,
                         policyType,
                         sector,
-                        bm25ScoreFirst
+                        bm25ScoreFirst,
+                        pays
                 ));
 
                 currentBatchSize++;
