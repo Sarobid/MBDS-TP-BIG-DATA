@@ -91,6 +91,6 @@ Avant de lancer le script python, s'assurer que Hive est lancé et opérationnel
 ```bash
 spark-submit \
   --jars /vagrant/sql_server/mssql-jdbc-12.4.2.jre8.jar \
-  --driver-class-path /vagrant/sql_server/mssql-jdbc-12.4.2.jre8.jar \
+  --driver-class-path /vagrant/sql_server/mysql-connector-j-8.0.33.jar \
   /vagrant/sql_server/Scripts.py
   ```
