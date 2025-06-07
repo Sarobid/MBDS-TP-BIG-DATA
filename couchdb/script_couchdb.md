@@ -110,7 +110,7 @@ curl -X POST http://admin:root@127.0.0.1:5984/energy_consumption/_find \
 ### Création de la base et table Hive
 
 ```sql
-CREATE DATABASE global_warming_db;
+CREATE DATABASE IF NOT EXISTS global_warming_db;
 USE global_warming_db;
 
 CREATE TABLE energy_consumptions (
@@ -139,10 +139,7 @@ pip install couchdb
 
 Lancez le script `spark_batch_initial.py` pour charger tous les données déjà présentes dans CouchDB vers Hive :
 ```bash
-spark-submit \
-  --jars /usr/share/java/mysql-connector-java.jar \
-  --driver-class-path /usr/share/java/mysql-connector-java.jar \
-  /vagrant/couchDBData/spark_batch.py
+spark-submit --jars /usr/share/java/mysql-connector-java.jar --driver-class-path /usr/share/java/mysql-connector-java.jar /vagrant/couchDBData/spark_batch_initial.py
 ```
 
 Le script lit toutes les données de CouchDB, les nettoie, les transforme, puis les écrit dans la table Hive `energy_consumptions` partitionnée par année.
@@ -151,10 +148,7 @@ Le script lit toutes les données de CouchDB, les nettoie, les transforme, puis 
 
 Lancez le script `spark_streaming_couchdb.py` pour charger les données en temps réel vers vers Hive :
 ```bash
-spark-submit \
-  --jars /usr/share/java/mysql-connector-java.jar \
-  --driver-class-path /usr/share/java/mysql-connector-java.jar \
-  /vagrant/couchDBData/spark_streaming_couchdb.py
+spark-submit--jars /usr/share/java/mysql-connector-java.jar --driver-class-path /usr/share/java/mysql-connector-java.jar /vagrant/couchDBData/spark_streaming_couchdb.py
 ```
 
 ---
