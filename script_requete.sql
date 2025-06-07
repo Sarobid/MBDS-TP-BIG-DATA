@@ -225,3 +225,77 @@ JOIN climate_policies_hive cp
   AND ABS(cp.year - d.year) <= 5
 GROUP BY dt.name, cp.policy_type
 ORDER BY avg_delay_years;
+
+
+----Region où une forte augmentation de la consommation d'énergie fossile provoque des catastrophes naturelles
+CREATE OR REPLACE VIEW v_energy_vvw_disaster_detailsariation_catastrophe AS
+select
+    disaster.year,
+    region.name as region_name,
+    country.name as country_name,
+    DisasterType.name as disaster_type,
+    DisasterSubtype.name as disaster_subtype,
+    disasterSubgroup.name as disaster_subgroup
+from
+    disaster
+    join disasterSubgroup on disaster.disastersubgroupid = disaster.disastersubgroupid
+    join DisasterType on DisasterType.disastertypeid = disaster.disastertypeid
+    join DisasterSubtype on DisasterSubtype.disastersubtypeid = disaster.disastersubtypeid
+    join region on region.regionid = disaster.regionid
+    join country on country.countryid = disaster.countryid ;
+
+CREATE OR REPLACE VIEW v_energy_variation_catastrophe AS
+WITH fossil_energy_per_year AS (
+  SELECT
+    CASE
+        WHEN region = 'Europe/Asia' THEN 'Europe'
+        ELSE region
+    END AS region,
+    year,
+    SUM(coal_ton + gas_m3 + oil_m3) AS total_fossil
+FROM energy_consumptions
+GROUP BY
+    CASE
+        WHEN region = 'Europe/Asia' THEN 'Europe'
+        ELSE region
+    END,
+    year
+),
+disasters_per_region_year AS (
+  SELECT
+    CASE
+        WHEN region_name IN ('Caribbean', 'Central America', 'Northern America') THEN 'North America'
+        WHEN region_name IN ('Eastern Asia', 'South-Eastern Asia', 'Southern Asia') THEN 'Asia'
+        WHEN region_name IN ('Western Africa') THEN 'Africa'
+        WHEN region_name IN ('Western Europe') THEN 'Europe'
+        ELSE 'Other'
+    END AS region,
+    year,
+    COUNT(CASE WHEN disaster_subgroup = 'Biological' THEN 1 END) AS biological_disasters,
+    COUNT(CASE WHEN disaster_subgroup = 'Climatological' THEN 1 END) AS climatological_disasters,
+    COUNT(CASE WHEN disaster_subgroup = 'Geophysical' THEN 1 END) AS geophysical_disasters,
+    COUNT(CASE WHEN disaster_subgroup = 'Hydrological' THEN 1 END) AS hydrological_disasters,
+    COUNT(CASE WHEN disaster_subgroup = 'Meteorological' THEN 1 END) AS meteorological_disasters,
+    COUNT(*) AS total_disasters
+  FROM vw_disaster_details
+  GROUP BY CASE
+        WHEN region_name IN ('Caribbean', 'Central America', 'Northern America') THEN 'North America'
+        WHEN region_name IN ('Eastern Asia', 'South-Eastern Asia', 'Southern Asia') THEN 'Asia'
+        WHEN region_name IN ('Western Africa') THEN 'Africa'
+        WHEN region_name IN ('Western Europe') THEN 'Europe'
+        ELSE 'Other' END
+    , year
+)
+SELECT
+  f.region as region,
+  f.year as year,
+  f.total_fossil as total_fossil,
+  d.total_disasters as total_disasters,
+  d.biological_disasters as biological_disasters,
+  d.climatological_disasters as climatological_disasters,
+  d.geophysical_disasters as geophysical_disasters,
+  d.hydrological_disasters as hydrological_disasters,
+  d.meteorological_disasters as meteorological_disasters
+FROM fossil_energy_per_year f
+JOIN disasters_per_region_year d ON f.region = d.region AND f.year = d.year
+ORDER BY f.region, f.year;
