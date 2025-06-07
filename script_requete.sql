@@ -299,3 +299,72 @@ SELECT
 FROM fossil_energy_per_year f
 JOIN disasters_per_region_year d ON f.region = d.region AND f.year = d.year
 ORDER BY f.region, f.year;
+
+-- - -quels changements peut on noter sur les consommations d'énergies selon les policy pour l'année 
+CREATE OR REPLACE VIEW vw_policy_effect_on_energy AS
+WITH energy_by_region_year AS (
+  SELECT 
+    year,
+    CASE
+      WHEN region = 'Europe/Asia' THEN 'Europe'
+      ELSE region
+    END AS region,
+    SUM(coal_ton + gas_m3 + oil_m3) AS fossil_energy,
+    SUM(hydro_twh + solar_twh + wind_twh + nuclear_twh) AS renewable_energy
+  FROM energy_consumptions
+  GROUP BY year, 
+    CASE
+      WHEN region = 'Europe/Asia' THEN 'Europe'
+      ELSE region
+    END
+),
+energy_joined AS (
+  SELECT
+    curr.region,
+    curr.year,
+    curr.fossil_energy,
+    curr.renewable_energy,
+    curr.fossil_energy - prev.fossil_energy AS fossil_delta,
+    curr.renewable_energy - prev.renewable_energy AS renewable_delta
+  FROM energy_by_region_year curr
+  JOIN energy_by_region_year prev 
+    ON curr.year = prev.year + 1 AND curr.region = prev.region
+),
+policies_per_region_year AS (
+  SELECT 
+    CASE
+      WHEN ipcc_region = 'Africa' THEN 'Africa'
+      WHEN ipcc_region IN ('Eastern Asia', 'South-East Asia and developing Pacific', 'Southern Asia', 'Asia-Pacific Developed') THEN 'Asia'
+      WHEN ipcc_region = 'Eurasia' THEN 'Europe'
+      WHEN ipcc_region = 'Europe' THEN 'Europe'
+      WHEN ipcc_region = 'North America' THEN 'North America'
+      WHEN ipcc_region = 'Latin America and Caribbean' THEN 'South America'
+      WHEN ipcc_region = 'Middle East' THEN 'Asia'
+      ELSE 'Other'
+    END AS region,
+    year,
+    COUNT(*) AS policy_count
+  FROM climate_policies_hive
+  GROUP BY
+    CASE
+      WHEN ipcc_region = 'Africa' THEN 'Africa'
+      WHEN ipcc_region IN ('Eastern Asia', 'South-East Asia and developing Pacific', 'Southern Asia', 'Asia-Pacific Developed') THEN 'Asia'
+      WHEN ipcc_region = 'Eurasia' THEN 'Europe'
+      WHEN ipcc_region = 'Europe' THEN 'Europe'
+      WHEN ipcc_region = 'North America' THEN 'North America'
+      WHEN ipcc_region = 'Latin America and Caribbean' THEN 'South America'
+      WHEN ipcc_region = 'Middle East' THEN 'Asia'
+      ELSE 'Other'
+    END,
+    year
+)
+SELECT
+  e.region,
+  e.year,
+  p.policy_count,
+  e.fossil_delta,
+  e.renewable_delta
+FROM energy_joined e
+LEFT JOIN policies_per_region_year p
+  ON e.region = p.region AND e.year = p.year
+ORDER BY e.region, e.year;
