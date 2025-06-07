@@ -2,7 +2,11 @@
 
 ## 1. Préparation du serveur
 ### Setup des fichiers nécessaires
-- Copier le fichier Tables.sql  de ce dans un dossier nommé sql_server que créerez dans COURSBIDATA 
+- Copier le fichier **Tables.sql**  de ce dans un dossier nommé sql_server que créerez dans COURSBIDATA 
+
+- Copier les drivers **mssql-jdbc-12.4.2.jre8.jar** et  **mysql-connector-j-8.0.33.jar** dans le dossier sql_server que vous avez créer précédemment
+
+- Copier le fichier **sql_server_to_hive.py** dans le dossier sql_server
 
 > Pour la suite des instructions se connecter sur vagrant
 
@@ -27,8 +31,8 @@ sudo /opt/mssql/bin/mssql-conf setup
 ```
 - Choisir l'option 2 pour option développeur
 
-- Choisir n'importe quel mot de passe comme mot de passe de l'admin
-> Vous pouvez choisir par exemple Admin_1_Admin 
+- Choisissez le mot de passe pour l'admin
+> Vous devez choisir Admin_1_Admin 
 
 ### Activer le service Sql Server
 ```bash
@@ -77,5 +81,16 @@ GO
 - Créer les tables et insérer les données
 ```bash
 sqlcmd -S localhost -U SA -P 'Votre_mot_de_passe' -d NaturalCatastrophe -i /vagrant/sql_server/Tables.sql
-GO
 ```
+
+## 3. Création de la base de données, des tables et insetion des données sur Sql Server
+Avant de lancer le script python, s'assurer que Hive est lancé et opérationnel
+- Créer la base de données **global_warming_db** sur Hive si elle n'existe pas encore
+
+- Lancer le script python
+```bash
+spark-submit \
+  --jars /vagrant/sql_server/mssql-jdbc-12.4.2.jre8.jar \
+  --driver-class-path /vagrant/sql_server/mssql-jdbc-12.4.2.jre8.jar \
+  /vagrant/sql_server/Scripts.py
+  ```
