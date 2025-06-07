@@ -92,3 +92,56 @@ GROUP BY
   dt.Name
 ORDER BY
   c.Name, policy_period, sg.Name, dt.Name limit 50;
+
+--. Quelles types de catastrophes ont tendance à se passer selon un intervalle de température ?--
+---	- température moyenne => quelles type de catategorie 
+SELECT 
+  dt.name AS disaster_type,
+  MIN(te.avgTemperature) as min_temp,
+  MAX(te.avgTemperature) as max_temp
+FROM 
+  disaster d
+  join country c on d.countryid = c.countryid
+JOIN temperature_h_ext te ON c.name = te.country AND d.year = te.year
+JOIN disastertype dt ON d.disastertypeid = dt.disastertypeid
+WHERE te.avgtemperature IS NOT NULL
+GROUP BY dt.name
+
+---Quelles types de mesures agissent le plus vite vs le plus lentement ?
+--	- combien d'années faut il attendre avant de voir que les mesures marchent ?
+SELECT 
+  cp.policy_type,
+  AVG(te.year - cp.year) AS avg_delay_years
+FROM 
+  climate_policies_hive cp
+JOIN energy_consumptions te 
+  ON cp.pays = te.country 
+  AND te.year BETWEEN cp.year AND cp.year + 5
+WHERE 
+  te.gas_emissions_ton < (
+    SELECT MIN(gas_emissions_ton)
+    FROM energy_consumptions e2
+    WHERE e2.country = cp.pays AND e2.year = cp.year
+  )
+GROUP BY cp.policy_type
+ORDER BY avg_delay_years;
+
+
+ --Réactivité des organismes internationaux selon les mesures
+ --- comparaison entre les mesures et les catastrophes qu'elles sont censées limiter => combien d'années / mois de différence , avant ou après les catastrophes
+
+SELECT 
+  dt.name AS disaster_type,
+  cp.policy_type,
+  AVG(cp.year - d.year) AS avg_delay_years
+FROM 
+  disaster d
+JOIN disastertype dt 
+  ON d.disastertypeid = dt.disastertypeid
+JOIN country c 
+  ON d.countryid = c.countryid
+JOIN climate_policies_hive cp 
+  ON cp.pays = c.name 
+  AND ABS(cp.year - d.year) <= 5
+GROUP BY dt.name, cp.policy_type
+ORDER BY avg_delay_years;
