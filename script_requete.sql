@@ -53,7 +53,6 @@ LEFT JOIN DisasterType dt
   ON d.DisasterTypeID = dt.DisasterTypeID
 LEFT JOIN DisasterSubtype dst
   ON d.DisasterSubtypeID = dst.DisasterSubtypeID
-WHERE dt.Name is not null 
 GROUP BY
   t1.region, t1.year, t1.avgTemperature, t2.avgTemperature, d.EventName, sg.Name, dt.Name, dst.Name
 ORDER BY

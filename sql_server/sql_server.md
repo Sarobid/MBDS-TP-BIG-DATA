@@ -1,4 +1,4 @@
-# Installation et Intégration de CouchDB avec Hive
+# Installation et Intégration de Sql Server avec Hive
 
 ## 1. Préparation du serveur
 ### Setup des fichiers nécessaires
