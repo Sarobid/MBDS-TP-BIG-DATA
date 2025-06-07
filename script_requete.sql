@@ -1,3 +1,17 @@
+--- Il faut harmoniser le données region de température
+CREATE OR REPLACE VIEW temperature_h_ext_harm AS
+SELECT
+  CASE
+    WHEN region = 'Australia/South Pacific' THEN 'Oceania'
+    WHEN region = 'South/Central America & Carribean' THEN 'South America'
+    WHEN region = 'Middle East' THEN 'Asia'
+    ELSE region
+  END AS region,
+  country,
+  year,
+  avgtemperature
+FROM temperature_h_ext;
+
 -- - Il faut catégoriser les mesures prises
 
 SELECT 
