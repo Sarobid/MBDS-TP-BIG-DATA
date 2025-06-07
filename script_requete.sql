@@ -227,7 +227,7 @@ ORDER BY avg_delay_years;
 
 
 ----Region où une forte augmentation de la consommation d'énergie fossile provoque des catastrophes naturelles
-CREATE OR REPLACE VIEW v_energy_vvw_disaster_detailsariation_catastrophe AS
+CREATE OR REPLACE VIEW v_energy_variation_catastrophe AS
 select
     disaster.year,
     region.name as region_name,
