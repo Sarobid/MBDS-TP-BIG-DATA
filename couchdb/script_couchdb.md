@@ -115,7 +115,6 @@ USE global_warming_db;
 
 CREATE TABLE energy_consumptions (
   country STRING,
-  year INT,
   region STRING,
   hydro_twh DOUBLE,
   solar_twh DOUBLE,
@@ -127,6 +126,7 @@ CREATE TABLE energy_consumptions (
   gas_emissions_ton DOUBLE,
   population INT
 )
+PARTITIONED BY (year INT)
 STORED AS PARQUET;
 ```
 
