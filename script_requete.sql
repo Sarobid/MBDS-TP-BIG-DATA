@@ -96,7 +96,6 @@ ORDER BY
 
 --- - Comment change la consommation d'énergie change par région après des catastrophes => quelles infrastructures de consommation sont les plus touchées
 ---	  - énergie la plus utilisée , énergie la moins utilisée
-create or replace view v_energy_variation_catastrophe as 
 with  v_country_energy_consumption as
 (select 
        country,
