@@ -142,6 +142,38 @@ left join v_country_energy_consumption vec2 on
 where vec1.year is not null and 
       vec2.year is not null;
 
+--- - Correlation entre emplacement géographique et mesures prises
+--- 	- quelles mesures marchent mieux sur quelle région ?
+select disasterDetails.*,
+       policies.policy_type,
+       policies.policy_count
+from
+(
+       select 
+              disaster.year,
+              country.name as country_name,
+              count(*) as disaster_count
+       from disaster
+       join region on region.regionid = disaster.regionid
+       join country on country.countryid = disaster.countryid
+group by 
+       disaster.year,
+       country.name
+) as disasterDetails
+left join 
+(
+  select 
+        year,
+         pays,
+         policy_type,
+         count(*) as policy_count
+  from climate_policies_hive cp
+  group by year,pays,policy_type
+) as policies
+on policies.pays = disasterDetails.country_name and
+   policies.year = disasterDetails.year
+
+
 --. Quelles types de catastrophes ont tendance à se passer selon un intervalle de température ?--
 ---	- température moyenne => quelles type de catategorie 
 SELECT 
