@@ -92,3 +92,52 @@ GROUP BY
   dt.Name
 ORDER BY
   c.Name, policy_period, sg.Name, dt.Name limit 50;
+
+
+--- - Comment change la consommation d'énergie change par région après des catastrophes => quelles infrastructures de consommation sont les plus touchées
+---	  - énergie la plus utilisée , énergie la moins utilisée
+create or replace view v_energy_variation_catastrophe as 
+with  v_country_energy_consumption as
+(select 
+       country,
+       year,
+       region,
+       greatest(hydro_twh,solar_twh,wind_twh) as max_renewable,
+       least(hydro_twh,solar_twh,wind_twh) as min_renewable,
+       greatest(coal_ton,gas_m3,oil_m3) as max_fossil,
+       least(coal_ton,gas_m3,oil_m3) as min_fossil
+from energy_consumptions)
+select
+       disasterDetails.* ,
+       vec1.year as previous_year,
+       vec1.max_renewable as previous_max_renewable,
+       vec1.min_renewable as previous_min_renewable,
+       vec1.max_fossil as previous_max_fossil,
+       vec1.min_fossil as previous_min_fossil,
+       vec2.year as next_year,
+       vec2.max_renewable as next_max_renewable,
+       vec2.min_renewable as next_min_renewable,
+       vec2.max_fossil as next_max_fossil,
+       vec2.min_fossil as next_min_fossil
+from 
+(
+       select 
+              disaster.year,
+              region.name as region_name,
+              country.name as country_name
+       from disaster
+       join region on region.regionid = disaster.regionid
+       join country on country.countryid = disaster.countryid
+group by 
+       disaster.year,
+       region.name,
+       country.name
+) as disasterDetails
+left join v_country_energy_consumption vec1 on 
+       disasterDetails.country_name = vec1.country and
+       disasterDetails.year-1 = vec1.year
+left join v_country_energy_consumption vec2 on 
+       disasterDetails.country_name = vec2.country and
+       disasterDetails.year+1 = vec2.year
+where vec1.year is not null and 
+      vec2.year is not null;
